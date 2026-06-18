@@ -8,12 +8,11 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --navy: #1B365D;       /* Azul Terrestre Institucional UNICACH */
-  --deep: #0F233F;       /* Azul Oscuro de Fondo */
-  --terra: #FF6B35;      /* Naranja Sísmico (Hipocentro/Energía) */
-  --amber: #E8A020;      /* Ámbar de Alerta / Prevención */
-  --teal: #0D6B6E;       /* Sostenibilidad / Energía Solar */
-  --gray-urban: #707A8A; /* Gris Infraestructura Ciudad */
+  --navy: #1B365D;       /* Azul UNICACH */
+  --deep: #0F233F;       /* Fondo Oscuro */
+  --terra: #FF6B35;      /* Naranja Sísmico */
+  --amber: #E8A020;      /* Ámbar de Alerta */
+  --teal: #0D6B6E;       /* Sustentabilidad */
   --white: #ffffff;
   --cream: #F5F0E8;
   --r: 1.2rem;
@@ -27,401 +26,330 @@ body {
   line-height: 1.6;
 }
 
-/* ─── SEISMIC BG CANVAS ─── */
-#quake-canvas { position: fixed; inset: 0; z-index: 0; opacity: .15; pointer-events: none; }
+/* --- CANVAS Y REJILLA SÍSMICA DE FONDO --- */
+#quake-canvas { position: fixed; inset: 0; z-index: 0; opacity: .20; pointer-events: none; }
 
-/* ─── HEADER & HERO ─── */
+.seismic-grid {
+  position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(255, 107, 53, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 107, 53, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: 0; pointer-events: none;
+}
+
+/* --- CABECERA (HEADER) --- */
 header {
   background: linear-gradient(135deg, var(--navy), var(--deep));
-  padding: 4rem 2rem 3rem 2rem;
+  padding: 5rem 2rem 4rem 2rem;
   text-align: center;
   position: relative;
   z-index: 1;
-  border-bottom: 3px solid var(--terra);
+  border-bottom: 4px solid var(--terra);
 }
+.logo-container img { max-width: 180px; height: auto; margin-bottom: 1rem; }
 .logo-area h1 {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 2.8rem;
+  font-size: 3.5rem;
   font-weight: 700;
-  letter-spacing: -1px;
   color: var(--white);
 }
 .logo-area h1 span { color: var(--terra); }
 .subtitle {
   font-size: 1.2rem;
   color: var(--cream);
-  max-width: 700px;
-  margin: 1rem auto 0 auto;
-  font-weight: 400;
-}
-.badge-unicach {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.4rem 1rem;
-  border-radius: 50px;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* ─── MAIN CONTENT ─── */
-main {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  position: relative;
-  z-index: 1;
-}
-
-/* ─── GRID DE VIDEOS EXPLICATIVOS ─── */
-.section-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid var(--terra);
-  padding-left: 0.75rem;
-}
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
-}
-.video-card {
-  background: rgba(27, 54, 93, 0.4);
-  border: 1px solid rgba(255, 107, 53, 0.2);
-  border-radius: var(--r);
-  padding: 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.video-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--terra);
-  background: rgba(27, 54, 93, 0.7);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-}
-.card-tag {
-  align-self: flex-start;
-  font-size: 0.75rem;
-  background: var(--terra);
-  color: var(--white);
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-}
-.card-speaker {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.3rem;
-  color: var(--white);
-}
-.card-topic {
-  font-size: 0.9rem;
-  color: var(--cream);
+  max-width: 800px;
+  margin: 1rem auto 0;
   opacity: 0.9;
 }
-.play-btn {
-  margin-top: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--terra);
+
+/* --- SECCIÓN PRINCIPAL Y MATRIZ DE MÓDULOS --- */
+main { max-width: 1200px; margin: 0 auto; padding: 4rem 1.5rem; position: relative; z-index: 1; }
+
+.section-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  margin-bottom: 3rem;
+  border-left: 6px solid var(--terra);
+  padding-left: 1.2rem;
 }
 
-/* ─── CUESTIONARIO / CALL TO ACTION ─── */
-.cta-box {
-  background: linear-gradient(135deg, rgba(13, 107, 110, 0.3), rgba(27, 54, 93, 0.5));
-  border: 2px solid var(--teal);
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 2.5rem;
+}
+
+/* EFECTO VIBRACIÓN (TREMOR SHAKE) AL PASAR EL MOUSE */
+@keyframes tremor {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0,0); }
+}
+
+.video-card {
+  background: rgba(27, 54, 93, 0.4);
+  border: 1px solid rgba(255, 107, 53, 0.25);
   border-radius: var(--r);
   padding: 2.5rem 2rem;
-  text-align: center;
-  margin-top: 3rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  position: relative;
+  overflow: hidden;
 }
-.cta-box h2 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-.cta-box p {
-  max-width: 600px;
-  margin: 0 auto 1.5rem auto;
-  color: var(--cream);
-}
-.btn-primary {
-  display: inline-block;
-  background: var(--terra);
-  color: var(--white);
-  padding: 0.8rem 2rem;
-  border-radius: 50px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.2s ease;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
-}
-.btn-primary:hover {
-  background: #e55a2b;
+.video-card:hover {
+  animation: tremor 0.2s infinite linear;
+  border-color: var(--terra);
+  background: rgba(27, 54, 93, 0.7);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.4);
 }
 
-/* ─── MODAL REPRODUCTOR ─── */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 35, 63, 0.9);
-  backdrop-filter: blur(8px);
-  z-index: 100;
+.card-tag {
+  font-size: 0.75rem;
+  color: var(--terra);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.card-speaker { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.3rem; color: #fff; }
+.card-topic { color: var(--cream); opacity: 0.8; font-size: 1rem; margin-bottom: 1.5rem; }
+.play-link {
   display: flex;
   align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  padding: 1rem;
+  gap: 0.6rem;
+  color: var(--terra);
+  font-weight: 600;
+  font-size: 0.95rem;
 }
-.modal.open { opacity: 1; pointer-events: all; }
+
+/* --- REPRODUCTOR MODAL EMERGENTE --- */
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(10, 20, 40, 0.95);
+  z-index: 1000;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal.active { display: flex; }
+
 .modal-content {
   background: var(--navy);
-  border: 2px solid var(--terra);
-  border-radius: var(--r);
-  max-width: 650px;
   width: 100%;
-  padding: 2rem;
+  max-width: 850px;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
   position: relative;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  border: 2px solid var(--terra);
 }
-.close-modal {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: transparent;
-  border: none;
-  color: var(--white);
-  font-size: 1.5rem;
-  cursor: pointer;
+.close-btn {
+  position: absolute; top: 1rem; right: 1.5rem;
+  font-size: 2.2rem; color: #fff; cursor: pointer;
+  line-height: 1;
 }
-.video-placeholder {
-  background: #000;
+.close-btn:hover { color: var(--terra); }
+
+video {
   width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: 8px;
-  margin: 1rem 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.script-box {
-  background: rgba(0,0,0,0.2);
-  padding: 1rem;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  border-left: 3px solid var(--amber);
-  color: var(--cream);
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  background: #000;
 }
 
-footer {
+/* --- LLAMADO A LA ACCIÓN (CUESTIONARIO TYPEFORM) --- */
+.cta-container {
   text-align: center;
-  padding: 2rem;
-  font-size: 0.85rem;
-  color: var(--gray-urban);
-  border-top: 1px solid rgba(255,255,255,0.05);
-  margin-top: 4rem;
+  margin-top: 5rem;
+  padding: 4rem 2rem;
+  background: linear-gradient(rgba(13, 107, 110, 0.2), transparent);
+  border-radius: 2rem;
+  border: 1px solid rgba(13, 107, 110, 0.3);
 }
+.cta-container h2 { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; margin-bottom: 0.5rem; }
 
-/* ─── RESPONSIVO ─── */
-@media(max-width: 600px) {
-  .logo-area h1 { font-size: 2rem; }
-  .subtitle { font-size: 1rem; }
-  .cta-box h2 { font-size: 1.5rem; }
+.btn-survey {
+  display: inline-block;
+  background: var(--terra);
+  color: #fff;
+  padding: 1.2rem 3rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+  transition: 0.3s;
 }
+.btn-survey:hover { transform: scale(1.05); background: #ff5722; }
+
+footer { text-align: center; padding: 3rem; color: #64748b; font-size: 0.9rem; border-top: 1px solid #1e293b; }
 </style>
 </head>
 <body>
 
+<div class="seismic-grid"></div>
 <canvas id="quake-canvas"></canvas>
 
 <header>
-  <div class="badge-unicach">UNICACH • Maestría en Gestión de Riesgos</div>
-  <div class="logo-area">
-    <h1>MID<span>Sis</span></h1>
+  <div class="logo-container">
+    <img src="image_d25761.png" alt="Logo MIDSis">
   </div>
-  <p class="subtitle">Modelo Interactivo de Dinámica Sísmica: Innovación físico-digital y didáctica para la divulgación científica y la comunicación del riesgo sísmico.</p>
+  <div class="logo-area"><h1>MID<span>Sis</span></h1></div>
+  <p class="subtitle">Innovación físico-digital para la divulgación científica y la comunicación del riesgo sísmico — UNICACH</p>
 </header>
 
 <main>
-  <section>
-    <h2 class="section-title">Módulos de Aprendizaje Digital</h2>
-    <div class="video-grid">
-      <!-- Los bloques se autogeneran con JS de manera limpia -->
-    </div>
-  </section>
+  <h2 class="section-title">Módulos de Aprendizaje Digital</h2>
+  <div class="video-grid" id="main-grid"></div>
 
-  <div class="cta-box">
-    <h2>¡Tu opinión es muy importante!</h2>
-    <p>Ayúdanos a evaluar el impacto social y pedagógico de MIDSis contestando nuestro breve cuestionario interactivo de caritas.</p>
-    
-    <!-- ⚠️ CAMBIA ESTE ENLACE POR TU LINK REAL DE TYPEFORM CUANDO LO TENGAS ⚠️ -->
-    <a href="https://form.typeform.com/to/TU_CODIGO_AQUI" id="typeform-link" target="_blank" class="btn-primary">
-      ¡Responder Cuestionario de Impacto! 😊
+  <div class="cta-container">
+    <h2>¿Qué te pareció la experiencia?</h2>
+    <p style="margin-bottom: 2rem; color: var(--cream); opacity: 0.8;">Tu evaluación nos ayuda a medir el impacto social y pedagógico del proyecto.</p>
+    <a href="https://form.typeform.com/to/RaVwap7Z" target="_blank" class="btn-survey">
+      ¡Responder Cuestionario! 😊
     </a>
   </div>
 </main>
 
 <footer>
   <p>© 2026 Instituto de Investigación en Gestión de Riesgos y Cambio Climático - UNICACH</p>
-  <p>8va Generación de Geociencias y Cambio Climático</p>
+  <p>Maestría en Gestión de Riesgos | 8va Generación</p>
 </footer>
 
-<!-- REPRODUCTOR MODAL -->
-<div class="modal" id="vid-modal" onclick="closeModal(event)">
+<div class="modal" id="videoModal">
   <div class="modal-content">
-    <button class="close-modal" onclick="closeModal(null)">×</button>
-    <span class="card-tag" id="m-topic" style="margin-bottom:0.5rem;">TÓPICO</span>
-    <h3 id="m-title" style="font-family:'Space Grotesk'; font-size:1.4rem; margin-bottom:1rem;">Nombre del Integrante</h3>
-    
-    <div class="video-placeholder">
-      <span style="color:var(--gray-urban); font-size:0.9rem;">[ Reproductor de Video IA / Multimedia ]</span>
-    </div>
-
-    <h4 style="font-size:0.9rem; margin-bottom:0.5rem; text-transform:uppercase; color:var(--amber); letter-spacing:0.5px;">Transcripción Educativa:</h4>
-    <p class="script-box" id="m-script">Texto del guión explicativo...</p>
+    <span class="close-btn" onclick="closeVideo()">&times;</span>
+    <h3 id="modalTitle" style="font-family:'Space Grotesk'; font-size:1.8rem; color:var(--terra);">Título</h3>
+    <video id="mainVideo" controls>
+      <source src="" type="video/mp4">
+      Tu navegador no soporta la reproducción de video.
+    </video>
+    <p id="modalDesc" style="color:var(--cream); opacity: 0.9; font-size: 1.05rem; line-height: 1.5;"></p>
   </div>
 </div>
 
 <script>
-/* ─── BASE DE DATOS DE INTEGRANTES Y VIDEOS (FIEL A LACSC 2026) ─── */
-const videoData = [
+// LISTADO ASOCIADO DIRECTAMENTE A TUS ARCHIVOS MP4 EN GITHUB
+const videos = [
   {
     tag: 'Introducción',
-    speaker: 'Oscar De Coss Henning',
+    name: 'Oscar De Coss Henning',
     topic: 'Propósito del Proyecto MIDSis',
-    script: 'Bienvenidos a MIDSis, un Modelo Interactivo de Dinámica Sísmica diseñado en la UNICACH. Tradicionalmente, la sismología se explica con tecnicismos difíciles de entender. Por eso creamos esta herramienta interactiva al aire libre para que experimentes en primera persona cómo se reajusta nuestro planeta. ¡Acompáñanos a descubrir la ciencia detrás de los sismos!'
+    file: '01_Introduccion_Oscar_De_Coss_Henning.mp4',
+    desc: 'Bienvenidos a MIDSis, un Modelo Interactivo de Dinámica Sísmica diseñado en la UNICACH. Esta herramienta interactiva al aire libre te permite experimentar en primera persona cómo se reajusta nuestro planeta.'
   },
   {
     tag: 'Contexto Local',
-    speaker: 'Martha Patricia García Saldívar',
+    name: 'Martha Patricia García Saldívar',
     topic: 'El Contexto Sísmico de Chiapas',
-    script: '¿Sabías que Chiapas es uno de los estados con mayor actividad sísmica en México? Esto ocurre porque nos encontramos sobre la interacción de tres grandes placas tectónicas: la de Norteamérica, la del Caribe y la placa de Cocos. En este modelo interactivo verás cómo el contacto continuo de estas placas acumula una energía colosal que tarde o temprano debe liberarse.'
+    file: '02_Contexto_Local_Martha_Patricia_Garcia_Saldivar.mp4',
+    desc: 'Chiapas es uno de los estados con mayor actividad sísmica en México debido a la interacción continua de tres grandes placas tectónicas: Norteamérica, Caribe y la placa de Cocos.'
   },
   {
     tag: 'Geociencias',
-    speaker: 'Luis Gilberto Gómez López',
+    name: 'Luis Gilberto Gómez López',
     topic: 'Del Hipocentro al Epicentro',
-    script: 'Cuando las placas tectónicas se traban y se rompen, el punto exacto en el subsuelo donde se origina la ruptura se llama hipocentro. La energía viaja verticalmente hasta el punto en la superficie ubicado justo encima, conocido como epicentro. A través de la sección transparente de MIDSis puedes observar exactamente cómo se realiza este viaje de energía.'
+    file: '03_Geociencias_Luis_Gilberto_Gomez_Lopez.mp4',
+    desc: 'Explicación del punto exacto en el subsuelo donde se origina la ruptura (hipocentro) y cómo viaja verticalmente la energía hasta manifestarse en la superficie (epicentro).'
   },
   {
     tag: 'Dinámica',
-    speaker: 'Raúl de Jesús Hernández Canela',
+    name: 'Raúl de Jesús Hernández Canela',
     topic: 'La Propagación de Ondas Sísmicas',
-    script: 'La energía liberada en el hipocentro no se queda quieta: viaja por el interior de la Tierra en forma de ondas sísmicas. MIDSis cuenta con generadores mecánicos especiales que simulan estas ondas para que puedas ver cómo se desplazan por el subsuelo y cómo interactúan con las fallas geológicas antes de sacudir la superficie.'
+    file: '04_Dinamica_Raul_de_Jesus_Hernandez_Canela.mp4',
+    desc: 'Demostración de cómo la energía liberada se desplaza por el interior de la Tierra en forma de ondas sísmicas e interactúa con el terreno.'
   },
   {
     tag: 'Riesgo Urbano',
-    speaker: 'Naomi Elisheba Matus Fuentes',
+    name: 'Naomi Elisheba Matus Fuentes',
     topic: 'Vulnerabilidad Urbana e Infraestructura',
-    script: 'Cuando las ondas sísmicas llegan a la superficie, la Tierra se mueve, afectando directamente a nuestras ciudades. Si observas la parte superior de nuestra maqueta, notarás una silueta urbana. El modelo simula la aceleración del terreno para evidenciar cómo responden las diferentes estructuras y por qué la ingeniería civil es crucial para salvar vidas.'
+    file: '05_Riesgo_Urbano_Naomi_Elisheba_Matus_Fuentes.mp4',
+    desc: 'Análisis de la aceleración del terreno y cómo responden las diferentes estructuras civiles de nuestras ciudades ante los movimientos de la Tierra.'
   },
   {
     tag: 'Sustentabilidad',
-    speaker: 'Jorge Alberto Sánchez Chong',
-    topic: 'Sustentabilidad y Funcionamiento Autónomo',
-    script: 'MIDSis no es solo innovación educativa, también es un proyecto sustentable. Para garantizar que funcione en espacios públicos de manera totalmente autónoma, la maqueta está construida con materiales resistentes a la intemperie y opera gracias a un sistema de energía solar fotovoltaica. Ciencia limpia para educar a nuestra comunidad.'
+    name: 'Jorge Alberto Sánchez Chong',
+    topic: 'Sustentabilidad y Funcionamiento',
+    file: '06_Sustentabilidad_Jorge_Alberto_Sanchez_Chong.mp4',
+    desc: 'Detalles sobre la construcción con materiales resistentes a la intemperie y la operación autónoma mediante un sistema de energía solar fotovoltaica.'
   },
   {
     tag: 'Prevención',
-    speaker: 'Francisco Javier Vázquez Morales',
+    name: 'Francisco Javier Vázquez Morales',
     topic: 'Conciencia y Cultura de Prevención',
-    script: 'Comprender la Tierra no solo es emocionante, nos ayuda a salvar vidas. Al conectar la ciencia con lo que vemos cotidianamente en nuestras comunidades, MIDSis busca fortalecer la resiliencia ciudadana y la cultura de prevención ante desastres. No olvides escanear el código QR al final para responder nuestro cuestionario. ¡Gracias por ser parte del cambio!'
+    file: '07_Prevencion_Francisco_Javier_Vazquez_Morales.mp4',
+    desc: 'Conclusión del recorrido enfocada en fortalecer la resiliencia ciudadana y la cultura de prevención ante fenómenos naturales de gran magnitud.'
   }
 ];
 
-/* ─── RENDERIZAR TARJETAS DINÁMICAMENTE ─── */
-const grid = document.querySelector('.video-grid');
-videoData.forEach((v, idx) => {
-  const card = document.createElement('div');
-  card.className = 'video-card';
-  card.setAttribute('onclick', `openVideo(${idx})`);
-  card.innerHTML = `
-    <div>
+// INYECTAR LAS TARJETAS EN LA PÁGINA
+const grid = document.getElementById('main-grid');
+videos.forEach((v, i) => {
+  grid.innerHTML += `
+    <div class="video-card" onclick="openVideo(${i})">
       <span class="card-tag">${v.tag}</span>
-      <h3 class="card-speaker">${v.speaker}</h3>
+      <h3 class="card-speaker">${v.name}</h3>
       <p class="card-topic">${v.topic}</p>
-    </div>
-    <div class="play-btn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      Ver explicación
+      <div class="play-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Ver explicación multimedia
+      </div>
     </div>
   `;
-  grid.appendChild(card);
 });
 
-/* ─── CONTROLADOR DEL REPRODUCTOR MODAL ─── */
-function openVideo(i) {
-  const v = videoData[i];
-  document.getElementById('m-topic').textContent = v.tag;
-  document.getElementById('m-title').textContent = v.speaker + ' — ' + v.topic;
-  document.getElementById('m-script').textContent = v.script;
-  document.getElementById('vid-modal').classList.add('open');
-}
-function closeModal(e) {
-  if (!e || e.target === document.getElementById('vid-modal') || e.target.className === 'close-modal') {
-    document.getElementById('vid-modal').classList.remove('open');
-  }
+// CONTROL DEL REPRODUCTOR
+function openVideo(index) {
+  const v = videos[index];
+  const modal = document.getElementById('videoModal');
+  const videoPlayer = document.getElementById('mainVideo');
+  
+  document.getElementById('modalTitle').innerText = v.name + " — " + v.topic;
+  document.getElementById('modalDesc').innerText = v.desc;
+  
+  videoPlayer.src = v.file;
+  modal.classList.add('active');
+  videoPlayer.play();
 }
 
-/* ─── FONDO ANIMADO SÍSMICO (CANVAS) ─── */
+function closeVideo() {
+  const modal = document.getElementById('videoModal');
+  const videoPlayer = document.getElementById('mainVideo');
+  modal.classList.remove('active');
+  videoPlayer.pause();
+  videoPlayer.src = "";
+}
+
+// SIMULACIÓN EFECTO ONDAS SÍSMICAS DE FONDO (CANVAS)
 const canvas = document.getElementById('quake-canvas');
 const ctx = canvas.getContext('2d');
 let waves = [];
 
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resize);
-resize();
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
 
-class SeismicWave {
+class Wave {
   constructor() {
     this.x = Math.random() * canvas.width;
     this.y = Math.random() * canvas.height;
     this.r = 1;
-    this.maxR = 80 + Math.random() * 120;
     this.alpha = 1;
-    this.speed = 0.5 + Math.random() * 1;
-  }
-  update() {
-    this.r += this.speed;
-    this.alpha = 1 - (this.r / this.maxR);
   }
   draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(255, 107, 53, ${this.alpha})`;
-    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(255, 107, 53, ${this.alpha * 0.25})`;
     ctx.stroke();
+    this.r += 1.2; this.alpha -= 0.008;
   }
 }
 
 function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (Math.random() < 0.02 && waves.length < 15) {
-    waves.push(new SeismicWave());
-  }
-  waves.forEach((w, i) => {
-    w.update();
-    w.draw();
-    if (w.alpha <= 0) waves.splice(i, 1);
-  });
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  if(Math.random() < 0.02) waves.push(new Wave());
+  waves.forEach((w, i) => { w.draw(); if(w.alpha <= 0) waves.splice(i, 1); });
   requestAnimationFrame(animate);
 }
 animate();
