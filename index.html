@@ -45,7 +45,7 @@ header {
   z-index: 1;
   border-bottom: 4px solid var(--terra);
 }
-.logo-container img { max-width: 180px; height: auto; margin-bottom: 1rem; }
+.logo-container img { max-width: 180px; height: auto; margin-bottom: 1rem; border-radius: 8px; }
 .logo-area h1 {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 3.5rem;
@@ -195,7 +195,7 @@ footer { text-align: center; padding: 3rem; color: #64748b; font-size: 0.9rem; b
 
 <header>
   <div class="logo-container">
-    <img src="image_d25761.png" alt="Logo MIDSis">
+    <img src="https://raw.githubusercontent.com/marthagarciassl-cmd/MIDSIS-UNICACH/main/WhatsApp%20Image%202026-06-16%20at%201.43.24%20PM.jpeg" alt="Logo MIDSis">
   </div>
   <div class="logo-area"><h1>MID<span>Sis</span></h1></div>
   <p class="subtitle">Innovación físico-digital para la divulgación científica y la comunicación del riesgo sísmico — UNICACH</p>
@@ -208,7 +208,7 @@ footer { text-align: center; padding: 3rem; color: #64748b; font-size: 0.9rem; b
   <div class="cta-container">
     <h2>¿Qué te pareció la experiencia?</h2>
     <p style="margin-bottom: 2rem; color: var(--cream); opacity: 0.8;">Tu evaluación nos ayuda a medir el impacto social y pedagógico del proyecto.</p>
-    <a href="https://form.typeform.com/to/RaVwap7Z" target="_blank" class="btn-survey">
+    <a href="https://form.typeform.com/to/RaVwap7Z" target="_blank" rel="noopener noreferrer" class="btn-survey">
       ¡Responder Cuestionario! 😊
     </a>
   </div>
@@ -232,55 +232,57 @@ footer { text-align: center; padding: 3rem; color: #64748b; font-size: 0.9rem; b
 </div>
 
 <script>
-// LISTADO ASOCIADO DIRECTAMENTE A TUS ARCHIVOS MP4 EN GITHUB
+// ENLACE ABSOLUTO COMPLETO DIRIGIDO A TUS SERVIDORES DE GITHUB RAW
+const URL_BASE = "https://raw.githubusercontent.com/marthagarciassl-cmd/MIDSIS-UNICACH/main/";
+
 const videos = [
   {
     tag: 'Introducción',
     name: 'Oscar De Coss Henning',
     topic: 'Propósito del Proyecto MIDSis',
-    file: '01_Introduccion_Oscar_De_Coss_Henning.mp4',
+    file: URL_BASE + '01_Introduccion_Oscar_De_Coss_Henning.mp4',
     desc: 'Bienvenidos a MIDSis, un Modelo Interactivo de Dinámica Sísmica diseñado en la UNICACH. Esta herramienta interactiva al aire libre te permite experimentar en primera persona cómo se reajusta nuestro planeta.'
   },
   {
     tag: 'Contexto Local',
     name: 'Martha Patricia García Saldívar',
     topic: 'El Contexto Sísmico de Chiapas',
-    file: '02_Contexto_Local_Martha_Patricia_Garcia_Saldivar.mp4',
+    file: URL_BASE + '02_Contexto_Local_Martha_Patricia_Garcia_Saldivar.mp4',
     desc: 'Chiapas es uno de los estados con mayor actividad sísmica en México debido a la interacción continua de tres grandes placas tectónicas: Norteamérica, Caribe y la placa de Cocos.'
   },
   {
     tag: 'Geociencias',
     name: 'Luis Gilberto Gómez López',
     topic: 'Del Hipocentro al Epicentro',
-    file: '03_Geociencias_Luis_Gilberto_Gomez_Lopez.mp4',
+    file: URL_BASE + '03_Geociencias_Luis_Gilberto_Gomez_Lopez.mp4',
     desc: 'Explicación del punto exacto en el subsuelo donde se origina la ruptura (hipocentro) y cómo viaja verticalmente la energía hasta manifestarse en la superficie (epicentro).'
   },
   {
     tag: 'Dinámica',
     name: 'Raúl de Jesús Hernández Canela',
     topic: 'La Propagación de Ondas Sísmicas',
-    file: '04_Dinamica_Raul_de_Jesus_Hernandez_Canela.mp4',
+    file: URL_BASE + '04_Dinamica_Raul_de_Jesus_Hernandez_Canela.mp4',
     desc: 'Demostración de cómo la energía liberada se desplaza por el interior de la Tierra en forma de ondas sísmicas e interactúa con el terreno.'
   },
   {
     tag: 'Riesgo Urbano',
     name: 'Naomi Elisheba Matus Fuentes',
     topic: 'Vulnerabilidad Urbana e Infraestructura',
-    file: '05_Riesgo_Urbano_Naomi_Elisheba_Matus_Fuentes.mp4',
+    file: URL_BASE + '05_Riesgo_Urbano_Naomi_Elisheba_Matus_Fuentes.mp4',
     desc: 'Análisis de la aceleración del terreno y cómo responden las diferentes estructuras civiles de nuestras ciudades ante los movimientos de la Tierra.'
   },
   {
     tag: 'Sustentabilidad',
     name: 'Jorge Alberto Sánchez Chong',
     topic: 'Sustentabilidad y Funcionamiento',
-    file: '06_Sustentabilidad_Jorge_Alberto_Sanchez_Chong.mp4',
+    file: URL_BASE + '06_Sustentabilidad_Jorge_Alberto_Sanchez_Chong.mp4',
     desc: 'Detalles sobre la construcción con materiales resistentes a la intemperie y la operación autónoma mediante un sistema de energía solar fotovoltaica.'
   },
   {
     tag: 'Prevención',
     name: 'Francisco Javier Vázquez Morales',
     topic: 'Conciencia y Cultura de Prevención',
-    file: '07_Prevencion_Francisco_Javier_Vazquez_Morales.mp4',
+    file: URL_BASE + '07_Prevencion_Francisco_Javier_Vazquez_Morales.mp4',
     desc: 'Conclusión del recorrido enfocada en fortalecer la resiliencia ciudadana y la cultura de prevención ante fenómenos naturales de gran magnitud.'
   }
 ];
@@ -313,11 +315,10 @@ function openVideo(index) {
   videoPlayer.src = v.file;
   modal.classList.add('active');
   
-  // Intenta reproducir el video de forma segura
   const playPromise = videoPlayer.play();
   if (playPromise !== undefined) {
     playPromise.catch(error => {
-      console.log("La reproducción automática requiere interacción o el video fue pausado: ", error);
+      console.log("Interacción requerida para reproducir video.");
     });
   }
 }
