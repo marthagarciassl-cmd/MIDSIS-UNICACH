@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MIDSis — Modelo Interactivo de Dinámica Sísmica</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1E35;
+  --deep:#1A3A5C;
+  --terra:#C45C2E;
+  --amber:#E8A020;
+  --teal:#0D6B6E;
+  --celeste:#85B7EB;
+  --cream:#F5F0E8;
+  --white:#ffffff;
+  --r:1.2rem;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--navy);
+  color:var(--white);
+  overflow-x:hidden;
+}
+
+/* ─── SEISMIC BG CANVAS ─── */
+#quake-canvas{position:fixed;inset:0;z-index:0;opacity:.18;pointer-events:none}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem 1.4rem;
+  background:rgba(11,30,53,.85);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.nav-logo{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:1.2rem;letter-spacing:.04em;
+  display:flex;align-items:center;gap:.4rem;
+}
+.nav-logo span{color:var(--terra);}
+.nav-pill{
+  background:rgba(196,92,46,.15);
+  border:1px solid rgba(196,92,46,.35);
+  color:var(--terra);font-size:.7rem;
+  padding:.25rem .65rem;border-radius:20px;letter-spacing:.05em;
+  font-family:'Space Grotesk',sans-serif;font-weight:500;
+}
+.nav-links{display:flex;gap:1.2rem;}
+.nav-links a{
+  font-size:.78rem;color:rgba(255,255,255,.6);
+  text-decoration:none;transition:color .2s;
+}
+.nav-links a:hover{color:var(--white);}
+
+/* ─── HERO ─── */
+.hero{
+  position:relative;z-index:1;
+  min-height:100svh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:6rem 1.5rem 3rem;
+  overflow:hidden;
+}
+.hero-eyebrow{
+  font-size:.68rem;letter-spacing:.14em;
+  color:var(--amber);font-weight:500;
+  text-transform:uppercase;margin-bottom:1rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.hero-eyebrow::before,.hero-eyebrow::after{
+  content:'';flex:1;height:1px;background:rgba(232,160,32,.3);
+}
+.hero h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2.2rem,9vw,4.5rem);
+  font-weight:700;line-height:1.05;
+  margin-bottom:.8rem;
+}
+.hero h1 em{color:var(--terra);font-style:normal;}
+.hero-sub{
+  font-size:clamp(.85rem,2.5vw,1rem);
+  color:rgba(255,255,255,.6);
+  max-width:420px;line-height:1.6;margin-bottom:2rem;
+}
+.hero-ctas{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;}
+.btn-primary{
+  background:var(--terra);color:#fff;
+  border:none;padding:.7rem 1.6rem;border-radius:30px;
+  font-family:'Space Grotesk',sans-serif;font-weight:600;
+  font-size:.85rem;cursor:pointer;letter-spacing:.02em;
+  transition:transform .15s,box-shadow .15s;
+  text-decoration:none;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(196,92,46,.45);}
+.btn-ghost{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.25);
+  color:rgba(255,255,255,.8);
+  padding:.7rem 1.6rem;border-radius:30px;
+  font-family:'Space Grotesk',sans-serif;font-size:.85rem;
+  cursor:pointer;text-decoration:none;transition:border-color .2s;
+}
+.btn-ghost:hover{border-color:rgba(255,255,255,.6);}
+
+/* scroll indicator */
+.scroll-hint{
+  position:absolute;bottom:1.8rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.35rem;
+  color:rgba(255,255,255,.35);font-size:.65rem;letter-spacing:.08em;
+}
+.scroll-dot{
+  width:1px;height:36px;background:linear-gradient(to bottom,rgba(255,255,255,.4),transparent);
+  animation:scrolld 1.8s ease-in-out infinite;
+}
+@keyframes scrolld{0%,100%{opacity:.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(.6)}}
+
+/* ─── SEISMOGRAPH LIVE ─── */
+.seismo-bar{
+  position:relative;z-index:1;
+  padding:.5rem 1.5rem 1.5rem;
+  background:rgba(26,58,92,.3);
+  border-top:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.seismo-label{
+  font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(133,183,235,.7);margin-bottom:.4rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.seismo-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#4ade80;
+  animation:pulse-dot 1.2s ease-in-out infinite;
+}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.6)}70%{box-shadow:0 0 0 6px rgba(74,222,128,0)}}
+#seismo-canvas{width:100%;height:56px;display:block;}
+
+/* ─── SECTION BASE ─── */
+section{position:relative;z-index:1;padding:3.5rem 1.5rem;}
+.section-tag{
+  display:inline-block;
+  font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+  font-weight:600;padding:.25rem .7rem;border-radius:4px;
+  margin-bottom:.9rem;font-family:'Space Grotesk',sans-serif;
+}
+.tag-terra{background:rgba(196,92,46,.18);color:var(--terra);}
+.tag-teal{background:rgba(13,107,110,.25);color:#4ecdc4;}
+.tag-amber{background:rgba(232,160,32,.18);color:var(--amber);}
+.tag-celeste{background:rgba(133,183,235,.15);color:var(--celeste);}
+.section-h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(1.5rem,5vw,2.2rem);
+  font-weight:700;line-height:1.1;margin-bottom:.6rem;
+}
+.section-lead{
+  font-size:.9rem;color:rgba(255,255,255,.55);
+  line-height:1.65;max-width:520px;margin-bottom:2rem;
+}
+
+/* ─── CARDS GRID ─── */
+.cards{display:grid;gap:1rem;grid-template-columns:1fr 1fr;}
+@media(max-width:520px){.cards{grid-template-columns:1fr;}}
+.card{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:var(--r);padding:1.25rem;
+  transition:transform .2s,border-color .2s;
+  cursor:pointer;
+}
+.card:hover{transform:translateY(-3px);border-color:rgba(196,92,46,.4);}
+.card-icon{font-size:2rem;margin-bottom:.7rem;}
+.card-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;font-size:.95rem;margin-bottom:.35rem;
+}
+.card-text{font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.55;}
+
+/* ─── EARTH LAYERS VISUAL ─── */
+.earth-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  gap:1.5rem;
+  padding:2rem 1.5rem 3rem;
+}
+#earth-svg-wrap{width:min(280px,80vw);}
+.layer-info{
+  display:grid;grid-template-columns:1fr 1fr;gap:.75rem;width:100%;
+}
+.layer-chip{
+  border-radius:10px;padding:.9rem 1rem;
+  border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;transition:transform .15s;
+}
+.layer-chip:hover{transform:scale(1.02);}
+.layer-chip .lc-name{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;font-size:.82rem;margin-bottom:.2rem;
+}
+.layer-chip .lc-temp{font-size:.72rem;opacity:.7;}
+
+/* ─── WAVE ANIMATOR ─── */
+.wave-section{padding:3rem 1.5rem;}
+.wave-types{display:flex;flex-direction:column;gap:1.2rem;}
+.wave-row{display:flex;align-items:center;gap:1rem;}
+.wave-label{
+  min-width:36px;font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:1rem;
+}
+.wave-track{flex:1;height:48px;border-radius:8px;overflow:hidden;background:rgba(255,255,255,.04);position:relative;}
+.wave-canvas{width:100%;height:100%;display:block;}
+.wave-desc{min-width:90px;font-size:.72rem;color:rgba(255,255,255,.5);text-align:right;line-height:1.4;}
+
+/* ─── PREVENTION CHECKLIST ─── */
+.prevent-grid{display:flex;flex-direction:column;gap:.6rem;}
+.check-item{
+  display:flex;align-items:center;gap:1rem;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;padding:.85rem 1rem;
+  cursor:pointer;transition:all .2s;
+}
+.check-item.done{
+  background:rgba(13,107,110,.2);
+  border-color:rgba(13,107,110,.4);
+}
+.check-box{
+  width:24px;height:24px;border-radius:6px;
+  border:2px solid rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .2s;font-size:.85rem;
+}
+.check-item.done .check-box{
+  background:var(--teal);border-color:var(--teal);
+}
+.check-text{font-size:.82rem;line-height:1.4;}
+.check-title{font-weight:500;font-size:.85rem;margin-bottom:.15rem;}
+
+/* ─── SOLAR VISUAL ─── */
+.solar-meter{
+  background:rgba(232,160,32,.07);
+  border:1px solid rgba(232,160,32,.2);
+  border-radius:var(--r);padding:1.5rem;
+  margin-bottom:1.2rem;
+}
+.solar-val{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:3rem;font-weight:700;
+  color:var(--amber);line-height:1;
+}
+.solar-unit{font-size:1rem;color:rgba(255,255,255,.5);margin-left:.3rem;}
+.solar-label{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:.3rem;}
+.solar-bar-wrap{background:rgba(255,255,255,.08);border-radius:20px;height:8px;overflow:hidden;margin-top:1rem;}
+.solar-bar{height:100%;background:linear-gradient(90deg,#e8a020,#f5d060);border-radius:20px;width:78%;animation:solar-fill 1.5s ease-out forwards;}
+@keyframes solar-fill{from{width:0}to{width:78%}}
+.solar-facts{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.sfact{
+  background:rgba(255,255,255,.04);border-radius:10px;
+  padding:.9rem;text-align:center;
+  border:1px solid rgba(255,255,255,.07);
+}
+.sfact-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.5rem;font-weight:700;color:var(--amber);
+}
+.sfact-text{font-size:.7rem;color:rgba(255,255,255,.45);margin-top:.2rem;}
+
+/* ─── VIDEOS GRID ─── */
+.video-grid{display:grid;gap:1rem;grid-template-columns:1fr 1fr;}
+@media(max-width:480px){.video-grid{grid-template-columns:1fr;}}
+.vcard{
+  border-radius:var(--r);overflow:hidden;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;transition:transform .2s;
+}
+.vcard:hover{transform:translateY(-3px);}
+.vcard-thumb{
+  aspect-ratio:16/9;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;position:relative;overflow:hidden;
+}
+.vcard-play{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.3);
+  transition:background .2s;
+}
+.vcard:hover .vcard-play{background:rgba(0,0,0,.15);}
+.play-btn{
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(255,255,255,.9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;padding-left:3px;
+}
+.vcard-body{padding:.85rem;}
+.vcard-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:.65rem;letter-spacing:.1em;
+  color:var(--terra);margin-bottom:.25rem;text-transform:uppercase;
+}
+.vcard-title{font-weight:500;font-size:.82rem;line-height:1.35;}
+.vcard-dur{font-size:.7rem;color:rgba(255,255,255,.35);margin-top:.3rem;}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--r);padding:1.5rem;
+}
+.quiz-q{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;font-size:1rem;
+  margin-bottom:1.1rem;line-height:1.4;
+}
+.quiz-options{display:flex;flex-direction:column;gap:.6rem;}
+.q-opt{
+  border-radius:8px;padding:.75rem 1rem;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  font-size:.82rem;cursor:pointer;
+  transition:all .2s;text-align:left;
+  color:#fff;width:100%;
+}
+.q-opt:hover{background:rgba(196,92,46,.15);border-color:rgba(196,92,46,.4);}
+.q-opt.correct{background:rgba(13,107,110,.25);border-color:rgba(13,107,110,.6);}
+.q-opt.wrong{background:rgba(196,92,46,.2);border-color:rgba(196,92,46,.5);}
+.quiz-feedback{
+  margin-top:1rem;font-size:.82rem;
+  padding:.75rem 1rem;border-radius:8px;
+  display:none;line-height:1.5;
+}
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.2rem;}
+.quiz-dots{display:flex;gap:.4rem;}
+.qdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .2s;}
+.qdot.active{background:var(--terra);}
+.qdot.done{background:var(--teal);}
+
+/* ─── TEAM ─── */
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:480px){.team-grid{grid-template-columns:1fr;}}
+.team-card{
+  background:rgba(255,255,255,.04);
+  border-radius:var(--r);padding:1.1rem;
+  border:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;gap:.85rem;
+}
+.team-avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:.9rem;flex-shrink:0;
+}
+.team-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;margin-bottom:.2rem;}
+.team-role{font-size:.7rem;color:rgba(255,255,255,.45);}
+
+/* ─── FOOTER ─── */
+footer{
+  background:rgba(0,0,0,.4);
+  border-top:1px solid rgba(255,255,255,.07);
+  padding:2rem 1.5rem;text-align:center;
+  position:relative;z-index:1;
+}
+.footer-logo{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.4rem;font-weight:700;margin-bottom:.4rem;
+}
+.footer-logo span{color:var(--terra);}
+.footer-sub{font-size:.75rem;color:rgba(255,255,255,.35);line-height:1.6;}
+
+/* ─── QR FLOAT ─── */
+.qr-float{
+  position:fixed;bottom:1.2rem;right:1.2rem;z-index:200;
+  background:var(--terra);border-radius:12px;
+  padding:.7rem;box-shadow:0 4px 20px rgba(196,92,46,.5);
+  cursor:pointer;transition:transform .2s;
+}
+.qr-float:hover{transform:scale(1.06);}
+.qr-float svg{display:block;}
+.qr-label{font-size:.55rem;text-align:center;margin-top:.3rem;font-weight:600;letter-spacing:.05em;color:rgba(255,255,255,.9);}
+
+/* ─── MODAL VIDEO ─── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.88);
+  display:none;align-items:center;justify-content:center;
+  padding:1rem;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:#0B1E35;border-radius:var(--r);
+  padding:1.5rem;max-width:480px;width:100%;
+  border:1px solid rgba(255,255,255,.1);position:relative;
+}
+.modal-close{
+  position:absolute;top:1rem;right:1rem;
+  background:rgba(255,255,255,.1);border:none;
+  color:#fff;width:30px;height:30px;
+  border-radius:50%;cursor:pointer;font-size:1rem;
+}
+.modal-topic{font-size:.7rem;color:var(--terra);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:1rem;}
+.modal-script{
+  font-size:.82rem;color:rgba(255,255,255,.7);
+  line-height:1.7;background:rgba(255,255,255,.04);
+  border-radius:8px;padding:1rem;border-left:3px solid var(--terra);
+  max-height:260px;overflow-y:auto;
+}
+
+/* ─── UTILS ─── */
+.divider{
+  border:none;
+  border-top:1px solid rgba(255,255,255,.06);
+  margin:0;
+}
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s;}
+.fade-in.visible{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<!-- SEISMIC BACKGROUND -->
+<canvas id="quake-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">MID<span>Sis</span></div>
+  <nav class="nav-links">
+    <a href="#aprende">Aprende</a>
+    <a href="#videos">Videos</a>
+    <a href="#quiz">Quiz</a>
+    <a href="#equipo">Equipo</a>
+  </nav>
+  <div class="nav-pill">UNICACH</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Proyecto MIDSis · Dra. Avith Mendoza Ponce</p>
+  <h1>Siente la <em>Tierra</em><br>que pisas</h1>
+  <p class="hero-sub">Explora la dinámica sísmica de Chiapas con ciencia interactiva y energía solar.</p>
+  <div class="hero-ctas">
+    <a href="#aprende" class="btn-primary">Explorar ↓</a>
+    <a href="#quiz" class="btn-ghost">Hacer el quiz</a>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-dot"></div>
+    <span>DESLIZA</span>
+  </div>
+</section>
+
+<!-- LIVE SEISMOGRAPH -->
+<div class="seismo-bar">
+  <div class="seismo-label">
+    <div class="seismo-dot"></div>
+    Sismógrafo en vivo · MIDSis
+  </div>
+  <canvas id="seismo-canvas" height="56"></canvas>
+</div>
+
+<!-- APRENDE: TIERRA -->
+<section id="aprende" class="earth-wrap fade-in">
+  <div style="text-align:center">
+    <span class="section-tag tag-terra">La Tierra</span>
+    <h2 class="section-h2">Toca para explorar<br>cada capa</h2>
+  </div>
+  <div id="earth-svg-wrap">
+    <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="circ"><circle cx="140" cy="140" r="130"/></clipPath>
+      </defs>
+      <!-- Núcleo interno -->
+      <circle cx="140" cy="140" r="38" fill="#E8A020" id="layer-ni" style="cursor:pointer" onclick="showLayer('ni')"/>
+      <!-- Núcleo externo -->
+      <circle cx="140" cy="140" r="68" fill="#C45C2E" id="layer-ne" style="cursor:pointer" onclick="showLayer('ne')"/>
+      <!-- Manto inferior -->
+      <circle cx="140" cy="140" r="98" fill="#8B3D1A" id="layer-ml" style="cursor:pointer" onclick="showLayer('ml')"/>
+      <!-- Manto superior -->
+      <circle cx="140" cy="140" r="118" fill="#5A2D14" id="layer-ms" style="cursor:pointer" onclick="showLayer('ms')"/>
+      <!-- Corteza -->
+      <circle cx="140" cy="140" r="130" fill="#1A5C3A" id="layer-co" style="cursor:pointer" onclick="showLayer('co')"/>
+      <!-- Líneas de falla en corteza -->
+      <g clip-path="url(#circ)" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1">
+        <path d="M80 20 Q100 80 85 140 Q70 190 100 260"/>
+        <path d="M190 15 Q210 90 195 150 Q180 200 210 265"/>
+        <path d="M20 120 Q80 135 140 130 Q200 125 262 140"/>
+      </g>
+      <!-- Superficie agua -->
+      <ellipse cx="140" cy="140" rx="130" ry="130" fill="none" stroke="rgba(133,183,235,.6)" stroke-width="1.5" clip-path="url(#circ)"/>
+      <!-- Label arcs -->
+      <text font-family="'Space Grotesk',sans-serif" font-size="9" fill="rgba(255,255,255,.9)" text-anchor="middle" x="140" y="105">CORTEZA</text>
+      <text font-family="'Space Grotesk',sans-serif" font-size="8" fill="rgba(255,255,255,.7)" text-anchor="middle" x="140" y="122">MANTO</text>
+      <text font-family="'Space Grotesk',sans-serif" font-size="7" fill="rgba(255,255,255,.6)" text-anchor="middle" x="140" y="143">N. EXT.</text>
+      <text font-family="'Space Grotesk',sans-serif" font-size="7" fill="#0B1E35" text-anchor="middle" x="140" y="143" dy="12">N. INT.</text>
+      <!-- Ring highlight on hover -->
+      <circle cx="140" cy="140" r="130" fill="none" stroke="rgba(196,92,46,.5)" stroke-width="2" id="layer-ring" style="opacity:0;transition:opacity .3s;pointer-events:none"/>
+    </svg>
+  </div>
+  <!-- Layer chips -->
+  <div class="layer-info">
+    <div class="layer-chip" style="background:rgba(26,92,58,.3);border-color:rgba(26,92,58,.5);" onclick="showLayer('co')">
+      <div class="lc-name" style="color:#4ecdc4;">🌍 Corteza</div>
+      <div class="lc-temp">5–70 km · Fría</div>
+    </div>
+    <div class="layer-chip" style="background:rgba(90,45,20,.3);border-color:rgba(90,45,20,.5);" onclick="showLayer('ms')">
+      <div class="lc-name" style="color:#E8A020;">🔥 Manto</div>
+      <div class="lc-temp">700–2 900 km · 3 700°C</div>
+    </div>
+    <div class="layer-chip" style="background:rgba(196,92,46,.2);border-color:rgba(196,92,46,.4);" onclick="showLayer('ne')">
+      <div class="lc-name" style="color:#C45C2E;">💧 Núcleo ext.</div>
+      <div class="lc-temp">Líquido · 4 500°C</div>
+    </div>
+    <div class="layer-chip" style="background:rgba(232,160,32,.15);border-color:rgba(232,160,32,.35);" onclick="showLayer('ni')">
+      <div class="lc-name" style="color:#E8A020;">⚡ Núcleo int.</div>
+      <div class="lc-temp">Sólido · 5 200°C</div>
+    </div>
+  </div>
+  <!-- Layer popup -->
+  <div id="layer-popup" style="display:none;background:rgba(26,58,92,.9);border:1px solid rgba(133,183,235,.3);border-radius:12px;padding:1rem 1.2rem;max-width:320px;width:100%;text-align:center;">
+    <div id="lp-name" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.4rem;"></div>
+    <div id="lp-desc" style="font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.6;"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ONDAS SÍSMICAS -->
+<section id="ondas" class="wave-section fade-in">
+  <span class="section-tag tag-celeste">Ondas sísmicas</span>
+  <h2 class="section-h2">3 tipos de onda,<br>3 efectos distintos</h2>
+  <div class="wave-types" style="margin-top:1.5rem;">
+    <div class="wave-row">
+      <div class="wave-label" style="color:#85B7EB;">P</div>
+      <div class="wave-track"><canvas class="wave-canvas" id="wc-p" height="48"></canvas></div>
+      <div class="wave-desc">Primaria<br>Más rápida<br>Compresión</div>
+    </div>
+    <div class="wave-row">
+      <div class="wave-label" style="color:#C45C2E;">S</div>
+      <div class="wave-track"><canvas class="wave-canvas" id="wc-s" height="48"></canvas></div>
+      <div class="wave-desc">Secundaria<br>Sacude<br>Mayor daño</div>
+    </div>
+    <div class="wave-row">
+      <div class="wave-label" style="color:#E8A020;">L</div>
+      <div class="wave-track"><canvas class="wave-canvas" id="wc-l" height="48"></canvas></div>
+      <div class="wave-desc">Superficial<br>Más lenta<br>Más larga</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PREVENCIÓN -->
+<section id="prevencion" class="fade-in">
+  <span class="section-tag tag-teal">Prepárate</span>
+  <h2 class="section-h2">¿Estás listo<br>para un sismo?</h2>
+  <p class="section-lead">Toca cada punto para marcarlo como listo.</p>
+  <div class="prevent-grid">
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      <div>
+        <div class="check-title">🎒 Mochila de emergencia</div>
+        <div class="check-text">Agua, medicamentos, linterna, documentos.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      <div>
+        <div class="check-title">📍 Punto de reunión</div>
+        <div class="check-text">Identifica el punto de reunión más cercano.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      <div>
+        <div class="check-title">🪑 Zonas seguras en casa</div>
+        <div class="check-text">Lejos de ventanas, bajo marcos o mesas.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      <div>
+        <div class="check-title">📵 No uses el elevador</div>
+        <div class="check-text">Siempre usa las escaleras durante un sismo.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      <div>
+        <div class="check-title">📞 Número de emergencias</div>
+        <div class="check-text">911 — guárdalo y compártelo.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">✓</div>
+      <div>
+        <div class="check-title">🔁 Participa en simulacros</div>
+        <div class="check-text">La práctica salva vidas. No te quedes fuera.</div>
+      </div>
+    </div>
+  </div>
+  <div id="check-msg" style="display:none;margin-top:1rem;padding:.85rem 1rem;background:rgba(13,107,110,.2);border:1px solid rgba(13,107,110,.4);border-radius:10px;font-size:.82rem;color:#4ecdc4;text-align:center;font-family:'Space Grotesk',sans-serif;font-weight:600;">
+    🎉 ¡Estás preparado/a! Comparte esto con tu familia.
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ENERGÍA SOLAR -->
+<section id="solar" class="fade-in">
+  <span class="section-tag tag-amber">Energía solar</span>
+  <h2 class="section-h2">Esta maqueta corre<br>con el sol</h2>
+  <div class="solar-meter">
+    <div style="display:flex;align-items:baseline;gap:.3rem;">
+      <span class="solar-val">5.5</span>
+      <span class="solar-unit">horas pico solar / día</span>
+    </div>
+    <div class="solar-label">Promedio Chiapas · Datos SENAMHI</div>
+    <div class="solar-bar-wrap"><div class="solar-bar"></div></div>
+  </div>
+  <div class="solar-facts">
+    <div class="sfact">
+      <div class="sfact-num">0<span style="font-size:1rem;">CO₂</span></div>
+      <div class="sfact-text">Emisiones de carbono</div>
+    </div>
+    <div class="sfact">
+      <div class="sfact-num">100%</div>
+      <div class="sfact-text">Energía renovable</div>
+    </div>
+    <div class="sfact">
+      <div class="sfact-num">12W</div>
+      <div class="sfact-text">Panel fotovoltaico</div>
+    </div>
+    <div class="sfact">
+      <div class="sfact-num">∞</div>
+      <div class="sfact-text">Vida útil del sol</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- VIDEOS -->
+<section id="videos" class="fade-in">
+  <span class="section-tag tag-terra">Videos del equipo</span>
+  <h2 class="section-h2">7 temas · 45 seg c/u</h2>
+  <p class="section-lead">Un integrante, un tema. Toca para ver el guión y recurso.</p>
+  <div class="video-grid">
+    <div class="vcard" onclick="openVideo(0)">
+      <div class="vcard-thumb" style="background:linear-gradient(135deg,#1A5C3A,#0B3020);">
+        <span>🌍</span>
+        <div class="vcard-play"><div class="play-btn" style="color:#1A5C3A;">▶</div></div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-num">Video 01</div>
+        <div class="vcard-title">Estructura terrestre</div>
+        <div class="vcard-dur">⏱ 42 seg</div>
+      </div>
+    </div>
+    <div class="vcard" onclick="openVideo(1)">
+      <div class="vcard-thumb" style="background:linear-gradient(135deg,#1A3A5C,#0B2035);">
+        <span>🧩</span>
+        <div class="vcard-play"><div class="play-btn" style="color:#1A3A5C;">▶</div></div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-num">Video 02</div>
+        <div class="vcard-title">Placas tectónicas</div>
+        <div class="vcard-dur">⏱ 44 seg</div>
+      </div>
+    </div>
+    <div class="vcard" onclick="openVideo(2)">
+      <div class="vcard-thumb" style="background:linear-gradient(135deg,#2C4060,#1A2840);">
+        <span>〰️</span>
+        <div class="vcard-play"><div class="play-btn" style="color:#2C4060;">▶</div></div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-num">Video 03</div>
+        <div class="vcard-title">Ondas sísmicas</div>
+        <div class="vcard-dur">⏱ 44 seg</div>
+      </div>
+    </div>
+    <div class="vcard" onclick="openVideo(3)">
+      <div class="vcard-thumb" style="background:linear-gradient(135deg,#3A2040,#220D30);">
+        <span>🏙️</span>
+        <div class="vcard-play"><div class="play-btn" style="color:#3A2040;">▶</div></div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-num">Video 04</div>
+        <div class="vcard-title">Infraestructura</div>
+        <div class="vcard-dur">⏱ 43 seg</div>
+      </div>
+    </div>
+    <div class="vcard" onclick="openVideo(4)">
+      <div class="vcard-thumb" style="background:linear-gradient(135deg,#0D3030,#051A1A);">
+        <span>🛡️</span>
+        <div class="vcard-play"><div class="play-btn" style="color:#0D3030;">▶</div></div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-num">Video 05</div>
+        <div class="vcard-title">Prevención</div>
+        <div class="vcard-dur">⏱ 44 seg</div>
+      </div>
+    </div>
+    <div class="vcard" onclick="openVideo(5)">
+      <div class="vcard-thumb" style="background:linear-gradient(135deg,#403010,#201800);">
+        <span>☀️</span>
+        <div class="vcard-play"><div class="play-btn" style="color:#403010;">▶</div></div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-num">Video 06</div>
+        <div class="vcard-title">Energía solar</div>
+        <div class="vcard-dur">⏱ 43 seg</div>
+      </div>
+    </div>
+    <div class="vcard" onclick="openVideo(6)" style="grid-column:span 2;">
+      <div style="display:flex;align-items:center;gap:1rem;padding:1.1rem;">
+        <div style="font-size:2.2rem;">👥</div>
+        <div>
+          <div class="vcard-num">Video 07</div>
+          <div class="vcard-title">Impacto social — MIDSis y la comunidad</div>
+          <div class="vcard-dur">⏱ 45 seg</div>
+        </div>
+        <div class="play-btn" style="margin-left:auto;color:#1A3A5C;flex-shrink:0;">▶</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- MINI QUIZ -->
+<section id="quiz" class="fade-in">
+  <span class="section-tag tag-teal">Quiz rápido</span>
+  <h2 class="section-h2">¿Cuánto aprendiste?</h2>
+  <p class="section-lead" style="margin-bottom:1.2rem;">3 preguntas · Sin registro · Instantáneo</p>
+  <div class="quiz-card">
+    <div id="quiz-area">
+      <div class="quiz-q" id="q-text"></div>
+      <div class="quiz-options" id="q-opts"></div>
+      <div class="quiz-feedback" id="q-feed"></div>
+    </div>
+    <div class="quiz-nav">
+      <div class="quiz-dots" id="q-dots"></div>
+      <button class="btn-ghost" id="q-next" onclick="nextQ()" style="font-size:.78rem;padding:.45rem 1rem;display:none;">Siguiente →</button>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- EQUIPO -->
+<section id="equipo" class="fade-in">
+  <span class="section-tag tag-celeste">El equipo</span>
+  <h2 class="section-h2">Quiénes somos</h2>
+  <div class="team-grid" style="margin-bottom:1.2rem;">
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(196,92,46,.2);color:var(--terra);">AM</div>
+      <div>
+        <div class="team-name">Dra. Avith Mendoza</div>
+        <div class="team-role">Responsable de materia</div>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(232,160,32,.2);color:var(--amber);">AV</div>
+      <div>
+        <div class="team-name">Dra. Andrea Venegas</div>
+        <div class="team-role">Análisis de datos</div>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(13,107,110,.2);color:#4ecdc4;">I1</div>
+      <div>
+        <div class="team-name">Integrante 1</div>
+        <div class="team-role">Estructura terrestre</div>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(133,183,235,.15);color:var(--celeste);">I2</div>
+      <div>
+        <div class="team-name">Integrante 2</div>
+        <div class="team-role">Placas tectónicas</div>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(196,92,46,.15);color:var(--terra);">I3</div>
+      <div>
+        <div class="team-name">Integrante 3</div>
+        <div class="team-role">Ondas sísmicas</div>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(232,160,32,.15);color:var(--amber);">I4</div>
+      <div>
+        <div class="team-name">Integrante 4</div>
+        <div class="team-role">Infraestructura</div>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(13,107,110,.15);color:#4ecdc4;">I5</div>
+      <div>
+        <div class="team-name">Integrante 5</div>
+        <div class="team-role">Prevención</div>
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(133,183,235,.12);color:var(--celeste);">I6</div>
+      <div>
+        <div class="team-name">Integrante 6</div>
+        <div class="team-role">Energía solar</div>
+      </div>
+    </div>
+  </div>
+  <div class="team-card" style="grid-column:span 2;">
+    <div class="team-avatar" style="background:rgba(196,92,46,.15);color:var(--terra);width:44px;height:44px;">I7</div>
+    <div>
+      <div class="team-name">Integrante 7</div>
+      <div class="team-role">Impacto social · UNICACH · Tuxtla Gutiérrez, Chiapas</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">MID<span>Sis</span></div>
+  <div class="footer-sub">
+    Modelo Interactivo de Dinámica Sísmica<br>
+    Universidad de Ciencias y Artes de Chiapas · UNICACH<br>
+    Responsable: Dra. Avith del Refugio Mendoza Ponce
+  </div>
+</footer>
+
+<!-- QR FLOAT BUTTON -->
+<div class="qr-float" title="Escanear QR de la maqueta">
+  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="11" height="11" rx="2" stroke="white" stroke-width="2" fill="none"/>
+    <rect x="6" y="6" width="5" height="5" fill="white"/>
+    <rect x="18" y="3" width="11" height="11" rx="2" stroke="white" stroke-width="2" fill="none"/>
+    <rect x="21" y="6" width="5" height="5" fill="white"/>
+    <rect x="3" y="18" width="11" height="11" rx="2" stroke="white" stroke-width="2" fill="none"/>
+    <rect x="6" y="21" width="5" height="5" fill="white"/>
+    <rect x="18" y="18" width="5" height="5" fill="white"/>
+    <rect x="25" y="18" width="6" height="2" fill="white"/>
+    <rect x="18" y="25" width="2" height="6" fill="white"/>
+    <rect x="23" y="23" width="3" height="3" fill="white"/>
+    <rect x="27" y="27" width="4" height="4" fill="white"/>
+  </svg>
+  <div class="qr-label">ESCANEA</div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-overlay" id="vid-modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-topic" id="m-topic"></div>
+    <div class="modal-title" id="m-title"></div>
+    <div class="modal-script" id="m-script"></div>
+    <div style="margin-top:1rem;padding:.75rem;background:rgba(232,160,32,.1);border-radius:8px;font-size:.75rem;color:rgba(255,255,255,.55);">
+      💡 Usa este guión para grabar tu video con avatar de IA. Duración: 45 seg máximo.
+    </div>
+  </div>
+</div>
+
+<script>
+/* ──────────────────────────────────
+   SEISMIC BACKGROUND CANVAS
+────────────────────────────────── */
+(function(){
+  const c=document.getElementById('quake-canvas');
+  const ctx=c.getContext('2d');
+  let W,H,lines=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<6;i++){lines.push({y:Math.random()*H,amp:10+Math.random()*25,freq:.01+Math.random()*.02,phase:Math.random()*Math.PI*2,speed:.003+Math.random()*.005,color:i<3?'rgba(196,92,46,':'rgba(133,183,235,'});}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    lines.forEach(l=>{
+      l.phase+=l.speed;
+      ctx.beginPath();
+      for(let x=0;x<W;x+=2){
+        const y=l.y+Math.sin(x*l.freq+l.phase)*l.amp;
+        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle=l.color+'0.6)';
+      ctx.lineWidth=1;ctx.stroke();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ──────────────────────────────────
+   LIVE SEISMOGRAPH
+────────────────────────────────── */
+(function(){
+  const c=document.getElementById('seismo-canvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  let data=[],pos=0,W=0,H=56;
+  function resize(){W=c.width=c.offsetWidth*devicePixelRatio;c.height=H*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);}
+  resize();window.addEventListener('resize',resize);
+  let t=0,quakeChance=0;
+  function step(){
+    t+=0.08;
+    quakeChance+=0.005;
+    let v=0;
+    if(Math.random()<quakeChance*.01){v=(Math.random()-.5)*30;quakeChance=0;}
+    v+=Math.sin(t*.7)*2+Math.sin(t*1.3)*.8+(Math.random()-.5)*.5;
+    data.push(v);if(data.length>400)data.shift();
+  }
+  function draw(){
+    step();
+    const w=W/devicePixelRatio;
+    ctx.clearRect(0,0,w,H);
+    ctx.beginPath();
+    const n=data.length;
+    for(let i=0;i<n;i++){
+      const x=(i/n)*w;
+      const y=H/2+data[i];
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='#85B7EB';ctx.lineWidth=1.5;ctx.stroke();
+    // moving cursor
+    const cx=(n/400)*w;
+    ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,H);
+    ctx.strokeStyle='rgba(232,160,32,.8)';ctx.lineWidth=1;ctx.stroke();
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ──────────────────────────────────
+   WAVE ANIMATIONS
+────────────────────────────────── */
+(function(){
+  const waves=[
+    {id:'wc-p',color:'#85B7EB',freq:3,amp:14,speed:0.12},
+    {id:'wc-s',color:'#C45C2E',freq:2,amp:18,speed:0.08},
+    {id:'wc-l',color:'#E8A020',freq:1,amp:10,speed:0.05}
+  ];
+  waves.forEach(w=>{
+    const c=document.getElementById(w.id);
+    if(!c)return;
+    const ctx=c.getContext('2d');
+    let t=0,W=0,H=48;
+    function resize(){W=c.width=c.offsetWidth*devicePixelRatio;c.height=H*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);}
+    resize();window.addEventListener('resize',resize);
+    function draw(){
+      t+=w.speed;
+      const wd=W/devicePixelRatio;
+      ctx.clearRect(0,0,wd,H);
+      ctx.beginPath();
+      for(let x=0;x<=wd;x+=1){
+        const y=H/2+Math.sin((x/wd)*Math.PI*2*w.freq+t)*w.amp;
+        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle=w.color;ctx.lineWidth=2;ctx.stroke();
+      requestAnimationFrame(draw);
+    }
+    draw();
+  });
+})();
+
+/* ──────────────────────────────────
+   EARTH LAYERS
+────────────────────────────────── */
+const layerData={
+  co:{name:'🌍 Corteza terrestre',desc:'La capa más externa y delgada. Aquí vivimos. Tiene entre 5 y 70 km de espesor. Es donde ocurren los sismos someros. Está fragmentada en placas tectónicas.'},
+  ms:{name:'🔥 Manto superior',desc:'Roca semisólida a temperaturas de hasta 1 600°C. Fluye muy lentamente (convección) y mueve las placas tectónicas. Tiene ~670 km de espesor.'},
+  ml:{name:'🌋 Manto inferior',desc:'Roca densa y caliente hasta ~2 900 km de profundidad. La presión es tan extrema que la roca se comporta casi como un sólido a pesar del calor.'},
+  ne:{name:'💧 Núcleo externo',desc:'Hierro y níquel en estado líquido. Su movimiento genera el campo magnético terrestre que nos protege del viento solar.'},
+  ni:{name:'⚡ Núcleo interno',desc:'Bola de hierro y níquel sólido de ~1 220 km de radio. Temperatura ~5 200°C, pero la presión extrema lo mantiene sólido. Rota ligeramente más rápido que el resto del planeta.'}
+};
+function showLayer(id){
+  const d=layerData[id];
+  const pop=document.getElementById('layer-popup');
+  document.getElementById('lp-name').textContent=d.name;
+  document.getElementById('lp-desc').textContent=d.desc;
+  pop.style.display='block';
+}
+
+/* ──────────────────────────────────
+   CHECKLIST
+────────────────────────────────── */
+function toggleCheck(el){
+  el.classList.toggle('done');
+  const done=document.querySelectorAll('.check-item.done').length;
+  const total=document.querySelectorAll('.check-item').length;
+  const msg=document.getElementById('check-msg');
+  msg.style.display=done===total?'block':'none';
+}
+
+/* ──────────────────────────────────
+   QUIZ
+────────────────────────────────── */
+const questions=[
+  {q:'¿Qué tipo de onda sísmica llega primero al sismógrafo?',opts:['Onda S','Onda P','Onda Love','Onda Rayleigh'],ans:1,exp:'Las ondas P (primarias) son las más rápidas — viajan por compresión y son las primeras en ser detectadas.'},
+  {q:'¿Cuál es la causa principal de los sismos en Chiapas?',opts:['Actividad volcánica','Movimiento de la placa de Cocos bajo la placa de Norteamérica','Colapso de cavernas','Tormentas eléctricas'],ans:1,exp:'La placa oceánica de Cocos se hunde (subduce) bajo la placa de Norteamérica, generando la alta actividad sísmica de la región.'},
+  {q:'¿En qué tipo de suelo se amplifican más las ondas sísmicas?',opts:['Roca sólida','Arena seca','Suelo arcilloso o blando','Concreto reforzado'],ans:2,exp:'El suelo blando y arcilloso actúa como una gelatina: amplifica las ondas y puede causar mayor daño que en roca firme.'}
+];
+let cq=0,answered=false;
+function renderQ(){
+  const q=questions[cq];
+  document.getElementById('q-text').textContent=q.q;
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='q-opt';b.textContent=o;
+    b.onclick=()=>answerQ(i);
+    opts.appendChild(b);
+  });
+  document.getElementById('q-feed').style.display='none';
+  document.getElementById('q-next').style.display='none';
+  const dots=document.getElementById('q-dots');
+  dots.innerHTML='';
+  questions.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='qdot'+(i===cq?' active':'')+(i<cq?' done':'');
+    dots.appendChild(d);
+  });
+  answered=false;
+}
+function answerQ(i){
+  if(answered)return;answered=true;
+  const q=questions[cq];
+  const opts=document.querySelectorAll('.q-opt');
+  opts.forEach((o,j)=>{
+    if(j===q.ans)o.classList.add('correct');
+    else if(j===i)o.classList.add('wrong');
+    o.disabled=true;
+  });
+  const feed=document.getElementById('q-feed');
+  if(i===q.ans){
+    feed.style.cssText='display:block;background:rgba(13,107,110,.2);border:1px solid rgba(13,107,110,.4);border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:#4ecdc4;margin-top:1rem;';
+    feed.textContent='✅ ¡Correcto! '+q.exp;
+  }else{
+    feed.style.cssText='display:block;background:rgba(196,92,46,.15);border:1px solid rgba(196,92,46,.3);border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:var(--terra);margin-top:1rem;';
+    feed.textContent='❌ Respuesta incorrecta. '+q.exp;
+  }
+  const nb=document.getElementById('q-next');
+  if(cq<questions.length-1){nb.style.display='block';nb.textContent='Siguiente →';}
+  else{nb.style.display='block';nb.textContent='Ver resultados 🎉';}
+}
+function nextQ(){
+  cq++;
+  if(cq>=questions.length){
+    document.getElementById('quiz-area').innerHTML='<div style="text-align:center;padding:1.5rem 0;"><div style="font-size:2.5rem;margin-bottom:.7rem;">🏆</div><div style="font-family:\'Space Grotesk\',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.4rem;">¡Quiz completado!</div><div style="font-size:.82rem;color:rgba(255,255,255,.55);">Gracias por aprender con MIDSis.<br>Comparte lo que aprendiste.</div></div>';
+    document.getElementById('q-dots').innerHTML='';
+    document.getElementById('q-next').style.display='none';
+    return;
+  }
+  renderQ();
+}
+renderQ();
+
+/* ──────────────────────────────────
+   VIDEO MODAL
+────────────────────────────────── */
+const videoData=[
+  {topic:'Estructura terrestre',title:'Las capas de la Tierra',script:'¿Sabes en cuántas capas está dividida la Tierra? La respuesta cambia todo lo que crees saber sobre los sismos. La Tierra tiene cuatro capas: la corteza, donde vivimos; el manto, roca caliente en movimiento; el núcleo externo, líquido; y el núcleo interno, sólido a más de 5 000°C. La corteza no es una pieza sólida: está fragmentada en placas tectónicas. Y cuando esas placas se mueven... sentimos la Tierra. Escanea el QR para explorar el modelo 3D.'},
+  {topic:'Placas tectónicas',title:'Balsa sobre roca fundida',script:'Imagina que el suelo que pisas es una balsa flotando sobre roca fundida. Eso, literalmente, somos. Las placas tectónicas se mueven a la velocidad a la que crecen tus uñas — pocos centímetros por año. Cuando dos placas se encuentran: una se hunde, se separan o se rozan. Chiapas está sobre la placa de Norteamérica, con la placa de Cocos hundiéndose debajo. Eso nos convierte en una de las zonas sísmicas más activas del mundo.'},
+  {topic:'Ondas sísmicas',title:'Las ondas que nos sacuden',script:'Cuando la tierra se rompe, no lo sientes de golpe: llegan las ondas. Las ondas P son las más rápidas — comprimen la roca como acordeón. Las ondas S sacuden de lado a lado y causan más daño. Las ondas superficiales son las más lentas pero las más destructivas. Los sismógrafos los detectan y nos dicen cuándo y dónde. Esta maqueta reproduce ese comportamiento en tiempo real.'},
+  {topic:'Infraestructura',title:'¿Por qué colapsan edificios?',script:'¿Por qué algunos edificios colapsan y otros no? No es solo el sismo: es el suelo y el diseño. El suelo blando amplifica las ondas — como sacudir una gelatina. Un edificio sobre ese suelo puede vibrar el doble. La solución está en el diseño antisísmico: cimentaciones profundas, amortiguadores y estructuras flexibles. En México, el 19S existe para recordarnos que aprender de los desastres salva vidas.'},
+  {topic:'Prevención',title:'Prepárate antes de que ocurra',script:'Un sismo no avisa — pero tú sí puedes prepararte. ¿Qué hacer antes? Zonas seguras en casa, mochila de emergencia, simulacros. ¿Durante? Aléjate de ventanas, no uses el elevador, no corras. ¿Después? Aléjate de estructuras dañadas, busca tu punto de reunión. En el QR encontrarás una lista descargable con todo lo que necesitas saber. Prepararse hoy es sobrevivir mañana.'},
+  {topic:'Energía solar',title:'El sol alimenta la ciencia',script:'¿Y si la ciencia que explica los sismos también cuida el planeta? Esta maqueta funciona completamente con energía solar. Un panel fotovoltaico capta la luz y la convierte en electricidad mediante el efecto fotoeléctrico — sin combustibles, sin emisiones. Chiapas recibe más de 5.5 horas de sol pico al día: uno de los mayores potenciales solares del país. La ciencia y la sustentabilidad pueden ir de la mano.'},
+  {topic:'Impacto social',title:'MIDSis y la comunidad',script:'MIDSis no es solo una maqueta — es una conversación con la comunidad. Vivimos en una de las zonas más sísmicas de México, pero la mayoría no sabe cómo funciona un sismo ni qué hacer. Este proyecto nació en la UNICACH con una misión: hacer la ciencia accesible para todos, sin importar la edad o la escolaridad. Cada persona que escanea un QR está construyendo una comunidad más informada y más segura. Porque entender la Tierra que habitamos es el primer paso para cuidar la vida que tenemos en ella.'}
+];
+function openVideo(i){
+  const v=videoData[i];
+  document.getElementById('m-topic').textContent=v.topic;
+  document.getElementById('m-title').textContent=v.title;
+  document.getElementById('m-script').textContent=v.script;
+  document.getElementById('vid-modal').classList.add('open');
+}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('vid-modal'))
+    document.getElementById('vid-modal').classList.remove('open');
+}
+
+/* ──────────────────────────────────
+   FADE-IN ON SCROLL
+────────────────────────────────── */
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.12});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
