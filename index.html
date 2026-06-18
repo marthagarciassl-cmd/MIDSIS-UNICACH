@@ -223,7 +223,7 @@ footer { text-align: center; padding: 3rem; color: #64748b; font-size: 0.9rem; b
   <div class="modal-content">
     <span class="close-btn" onclick="closeVideo()">&times;</span>
     <h3 id="modalTitle" style="font-family:'Space Grotesk'; font-size:1.8rem; color:var(--terra);">Título</h3>
-    <video id="mainVideo" controls>
+    <video id="mainVideo" controls playsinline webkit-playsinline>
       <source src="" type="video/mp4">
       Tu navegador no soporta la reproducción de video.
     </video>
@@ -312,7 +312,14 @@ function openVideo(index) {
   
   videoPlayer.src = v.file;
   modal.classList.add('active');
-  videoPlayer.play();
+  
+  // Intenta reproducir el video de forma segura
+  const playPromise = videoPlayer.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(error => {
+      console.log("La reproducción automática requiere interacción o el video fue pausado: ", error);
+    });
+  }
 }
 
 function closeVideo() {
